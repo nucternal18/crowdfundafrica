@@ -48,23 +48,32 @@ contract CrowdFundinAfrica {
     }
 
     function donateToCampaign(uint256 _campaignId) public payable {
-        Campaign storage selectedCampaign = campaigns[_campaignId];
-        selectedCampaign.amountCollected += msg.value;
-        selectedCampaign.donators.push(msg.sender);
-        selectedCampaign.donations.push(msg.value);
+        uint256 amount = msg.value;
+
+        Campaign storage campaign = campaigns[_campaignId];
+        campaign.donators.push(msg.sender);
+        campaign.donations.push(amount);
+
+        (bool sent, ) = payable(campaign.owner).call{value: amount}("");
+
+        if (sent) {
+            campaign.amountCollected = campaign.amountCollected + amount;
+        }
     }
 
     function getDonators(
         uint256 _campaignId
-    ) public view returns (address[] memory) {
+    ) public view returns (address[] memory, uint256[] memory) {
         Campaign storage selectedCampaign = campaigns[_campaignId];
-        return selectedCampaign.donators;
+        return (selectedCampaign.donators, selectedCampaign.donations);
     }
 
     function getCampains() public view returns (Campaign[] memory) {
         Campaign[] memory allCampaigns = new Campaign[](numberOfCampaigns);
         for (uint256 i = 0; i < numberOfCampaigns; i++) {
-            allCampaigns[i] = campaigns[i];
+            Campaign storage item = campaigns[i];
+
+            allCampaigns[i] = item;
         }
         return allCampaigns;
     }

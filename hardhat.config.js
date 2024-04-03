@@ -1,4 +1,5 @@
 require("@matterlabs/hardhat-zksync-solc");
+require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -12,18 +13,24 @@ module.exports = {
     },
   },
   networks: {
-    zksync_testnet: {
-      url: "https://zksync2-testnet.zksync.dev",
-      ethNetwork: "goerli",
-      chainId: 280,
-      zksync: true,
-    },
-    zksync_mainnet: {
-      url: "https://zksync2-mainnet.zksync.io/",
-      ethNetwork: "mainnet",
-      chainId: 324,
-      zksync: true,
-    },
+    // zksync_testnet: {
+    //   url: "https://zksync2-testnet.zksync.dev",
+    //   ethNetwork: "goerli",
+    //   chainId: 280,
+    //   zksync: true,
+    // },
+    // zksync_mainnet: {
+    //   url: "https://zksync2-mainnet.zksync.io/",
+    //   ethNetwork: "mainnet",
+    //   chainId: 324,
+    //   zksync: true,
+    // },
+    // sepolia: {
+    //   url: "https://sepolia.era.zksync.dev",
+    //   ethNetwork: "sepolia",
+    //   chainId: 300,
+    //   zksync: true,
+    // },
   },
   paths: {
     artifacts: "./artifacts-zk",
@@ -33,6 +40,13 @@ module.exports = {
   },
   solidity: {
     version: "0.8.17",
+    defaultNetwork: "sepolia",
+    networks: {
+      sepolia: {
+        url: process.env.RPC_URL,
+        accounts: [`0x${process.env.PRIVATE_KEY}`],
+      },
+    },
     settings: {
       optimizer: {
         enabled: true,
