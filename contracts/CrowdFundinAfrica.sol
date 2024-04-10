@@ -132,11 +132,56 @@ contract CrowdFundinAfrica {
             "You are not the owner of this campaign"
         );
 
+        // require the amount collected to be less than zero before removing the campaign
+        require(
+            campaigns[_campaignId].amountCollected == 0,
+            "The amount collected should be zero before removing the campaign"
+        );
+
+        // refund the donators
+        for (uint256 i = 0; i < campaigns[_campaignId].donators.length; i++) {
+            (bool sent, ) = payable(campaigns[_campaignId].donators[i]).call{
+                value: campaigns[_campaignId].donations[i]
+            }("");
+            require(sent, "Failed to refund donator");
+        }
+
         for (uint256 i = _campaignId; i < numberOfCampaigns - 1; i++) {
             campaigns[i] = campaigns[i + 1];
         }
 
         delete campaigns[numberOfCampaigns - 1];
         numberOfCampaigns--;
+    }
+
+    /**
+     * @dev Updates the details of a campaign.
+     * @param _campaignId The ID of the campaign
+     * @param _title The title of the campaign
+     * @param _description The description of the campaign
+     * @param _target The target amount to be raised
+     * @param _deadline The deadline for the campaign
+     * @param _image The image associated with the campaign
+     */
+    function updateCampaign(
+        uint256 _campaignId,
+        string memory _title,
+        string memory _description,
+        uint256 _target,
+        uint256 _deadline,
+        string memory _image
+    ) public {
+        require(_campaignId < numberOfCampaigns, "Invalid campaign id");
+        require(
+            campaigns[_campaignId].owner == msg.sender,
+            "You are not the owner of this campaign"
+        );
+
+        Campaign storage campaign = campaigns[_campaignId];
+        campaign.title = _title;
+        campaign.description = _description;
+        campaign.target = _target;
+        campaign.deadline = _deadline;
+        campaign.image = _image;
     }
 }
